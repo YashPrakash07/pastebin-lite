@@ -66,7 +66,7 @@ export default function PasteForm() {
 
     if (result) {
         return (
-            <div className="w-full max-w-2xl bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/50 dark:border-neutral-800 p-10 text-center animate-in fade-in zoom-in duration-500 hover:shadow-indigo-500/20 transition-all">
+            <div className="w-full max-w-2xl bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-500/10 border border-white/50 dark:border-neutral-800 p-6 sm:p-10 text-center animate-in fade-in zoom-in duration-500 hover:shadow-indigo-500/20 transition-all mx-4">
                 <div className="flex justify-center mb-8">
                     <div className="bg-gradient-to-br from-green-100 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/20 p-4 rounded-full text-green-600 dark:text-green-400 shadow-inner ring-4 ring-green-50 dark:ring-green-900/10">
                         <Check className="w-10 h-10" />
@@ -122,7 +122,7 @@ export default function PasteForm() {
                     </div>
                 )}
 
-                <div className="flex gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                     <a
                         href={result.url}
                         target="_blank"
@@ -156,13 +156,13 @@ export default function PasteForm() {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Paste your text here..."
-                        className="w-full h-96 p-6 resize-y bg-neutral-50/50 dark:bg-neutral-950/50 border border-neutral-200 dark:border-neutral-800 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 focus:outline-none text-neutral-800 dark:text-neutral-200 font-mono text-base placeholder-neutral-400 leading-relaxed transition-all"
+                        className="w-full h-64 sm:h-96 p-4 sm:p-6 resize-y bg-neutral-50/50 dark:bg-neutral-950/50 border border-neutral-200 dark:border-neutral-800 rounded-2xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 focus:outline-none text-neutral-800 dark:text-neutral-200 font-mono text-base placeholder-neutral-400 leading-relaxed transition-all"
                         required
                         spellCheck={false}
                     />
                 </div>
 
-                <div className="bg-gradient-to-b from-white/50 to-white/80 dark:from-neutral-900/50 dark:to-neutral-900/80 p-8 border-t border-neutral-100 dark:border-neutral-800 backdrop-blur-sm">
+                <div className="bg-gradient-to-b from-white/50 to-white/80 dark:from-neutral-900/50 dark:to-neutral-900/80 p-6 sm:p-8 border-t border-neutral-100 dark:border-neutral-800 backdrop-blur-sm">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div className="space-y-2">
                             <label className="block text-[11px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest ml-1">
@@ -248,7 +248,7 @@ export default function PasteForm() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-white transition-all duration-200 bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-xl hover:from-indigo-600 hover:to-violet-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5 active:scale-95 overflow-hidden"
+                            className="group relative inline-flex items-center justify-center px-6 sm:px-8 py-3.5 text-sm font-semibold text-white transition-all duration-200 bg-neutral-900 dark:bg-neutral-800 rounded-xl hover:bg-neutral-800 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 dark:focus:ring-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 overflow-hidden w-full sm:w-auto"
                         >
                             <span className="relative flex items-center gap-2">
                                 {loading ? (
@@ -259,7 +259,6 @@ export default function PasteForm() {
                                 ) : (
                                     <>
                                         Create Paste
-                                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-10" />
                                     </>
                                 )}
                             </span>

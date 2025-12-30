@@ -50,7 +50,7 @@ export default function RootLayout({
             </div>
           </header>
 
-          <main className="flex-1 flex flex-col items-center justify-center py-12 sm:py-24">
+          <main className="flex-1 flex flex-col items-center justify-center py-8 sm:py-24 px-4 w-full">
             {children}
           </main>
 
