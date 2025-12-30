@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
-import { getPaste } from "@/lib/storage";
+import { getPaste, decrementViews } from "@/lib/storage";
 import { getCurrentTime } from "@/lib/utils";
+import { compare } from "bcryptjs";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,6 +12,31 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   if (!paste) {
     return NextResponse.json({ error: "Paste not found or unavailable" }, { status: 404 });
+  }
+
+  // Handle Password Protection
+  if (paste.password_hash) {
+      const password = req.headers.get("x-paste-password");
+      
+      if (!password) {
+          return NextResponse.json({ error: "Password required", protected: true }, { status: 401 });
+      }
+
+      const isValid = await compare(password, paste.password_hash);
+      if (!isValid) {
+           return NextResponse.json({ error: "Incorrect password", protected: true }, { status: 401 });
+      }
+
+      // Decrement views (since getPaste skipped it for password protected pastes)
+      const success = await decrementViews(id);
+      if (!success) {
+           return NextResponse.json({ error: "Paste not found or unavailable" }, { status: 404 });
+      }
+      
+      // Update local object to reflect decrement for the response
+      if (paste.remaining_views) {
+          paste.remaining_views -= 1;
+      }
   }
 
   return NextResponse.json({

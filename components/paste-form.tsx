@@ -8,6 +8,7 @@ export default function PasteForm() {
     const [content, setContent] = useState("");
     const [ttl, setTtl] = useState("");
     const [maxViews, setMaxViews] = useState("");
+    const [password, setPassword] = useState("");
     const [language, setLanguage] = useState("plaintext");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export default function PasteForm() {
         setLoading(true);
 
         try {
-            const body: { content: string; ttl_seconds?: number; max_views?: number; language?: string } = { content };
+            const body: { content: string; ttl_seconds?: number; max_views?: number; language?: string; password?: string } = { content };
             if (language && language !== "plaintext") {
                 body.language = language;
             }
@@ -34,6 +35,9 @@ export default function PasteForm() {
                 const viewsVal = parseInt(maxViews);
                 if (isNaN(viewsVal) || viewsVal < 1) throw new Error("Invalid Max Views");
                 body.max_views = viewsVal;
+            }
+            if (password) {
+                body.password = password;
             }
 
             const res = await fetch("/api/pastes", {
@@ -128,6 +132,7 @@ export default function PasteForm() {
                             setContent("");
                             setTtl("");
                             setMaxViews("");
+                            setPassword("");
                             setLanguage("plaintext");
                         }}
                         className="text-neutral-500 hover:text-neutral-900 text-sm font-medium"
@@ -152,7 +157,7 @@ export default function PasteForm() {
                     />
                 </div>
 
-                <div className="bg-neutral-50 p-6 border-t border-neutral-100 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-neutral-50 p-6 border-t border-neutral-100 grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
                             Expiry (Seconds)
@@ -176,6 +181,18 @@ export default function PasteForm() {
                             placeholder="Optional (e.g. 5)"
                             value={maxViews}
                             onChange={(e) => setMaxViews(e.target.value)}
+                            className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all text-neutral-900 placeholder-neutral-400"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            placeholder="Optional"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all text-neutral-900 placeholder-neutral-400"
                         />
                     </div>

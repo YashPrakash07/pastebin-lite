@@ -4,7 +4,7 @@ import { getPaste } from "@/lib/storage";
 import { getCurrentTime } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import PasteViewer from "@/components/paste-viewer";
+import PasswordGate from "@/components/password-gate";
 import DeletePasteButton from "@/components/delete-button";
 
 export default async function PastePage({
@@ -58,7 +58,11 @@ export default async function PastePage({
                     </div>
 
                     <div className="p-6 overflow-x-auto">
-                        <PasteViewer content={paste.content} language={paste.language || "plaintext"} />
+                        <PasswordGate
+                            id={paste.id}
+                            initialContent={!!paste.password_hash ? null : paste.content}
+                            initialLanguage={paste.language || "plaintext"}
+                        />
                     </div>
 
                     {(paste.expires_at || paste.max_views) && (

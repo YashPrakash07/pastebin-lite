@@ -10,6 +10,7 @@ export interface Paste {
   remaining_views?: number | null;
   language?: string | null;
   delete_token?: string | null;
+  password_hash?: string | null;
 }
 
 export async function savePaste(paste: Paste) {
@@ -22,22 +23,17 @@ export async function savePaste(paste: Paste) {
     created_at: paste.created_at,
   };
 
-  if (paste.expires_at) {
-    data.expires_at = paste.expires_at;
-  }
+  if (paste.expires_at) data.expires_at = paste.expires_at;
   
   if (paste.max_views !== undefined && paste.max_views !== null) {
       data.max_views = paste.max_views;
       data.remaining_views = paste.max_views;
   }
 
-  if (paste.language) {
-      data.language = paste.language;
-  }
+  if (paste.language) data.language = paste.language;
   
-  if (paste.delete_token) {
-      data.delete_token = paste.delete_token;
-  }
+  if (paste.delete_token) data.delete_token = paste.delete_token;
+  if (paste.password_hash) data.password_hash = paste.password_hash;
 
   await kv.hset(key, data);
   
@@ -88,6 +84,12 @@ export async function getPaste(id: string, now: number): Promise<Paste | null> {
         end
     end
 
+    -- If password protected, WE DO NOT DECREMENT HERE.
+    -- The API must verify password first, then call decrementViews manually.
+    if paste["password_hash"] and paste["password_hash"] ~= "null" then
+        return cjson.encode(paste)
+    end
+
     -- Check View Limit (if exists)
     if paste["remaining_views"] and paste["remaining_views"] ~= "null" then
         local views = tonumber(paste["remaining_views"])
@@ -116,7 +118,8 @@ export async function getPaste(id: string, now: number): Promise<Paste | null> {
           max_views: parsed.max_views ? parseInt(parsed.max_views) : null,
           remaining_views: parsed.remaining_views !== undefined && parsed.remaining_views !== null ? parseInt(parsed.remaining_views) : null,
           language: parsed.language || null,
-          delete_token: parsed.delete_token || null
+          delete_token: parsed.delete_token || null,
+          password_hash: parsed.password_hash || null
       };
   } catch (err) {
       console.error("Redis Error", err);
@@ -124,6 +127,24 @@ export async function getPaste(id: string, now: number): Promise<Paste | null> {
       // If KV is not configured, this will throw.
       return null;
   }
+}
+
+export async function decrementViews(id: string): Promise<boolean> {
+    const key = `paste:${id}`;
+    const script = `
+        local key = KEYS[1]
+        local views = redis.call("HGET", key, "remaining_views")
+        if not views then return 1 end -- No limit
+        if tonumber(views) <= 0 then return 0 end -- Limit reached
+        redis.call("HINCRBY", key, "remaining_views", -1)
+        return 1
+    `;
+    try {
+        const result = await kv.eval(script, [key], []);
+        return result === 1;
+    } catch {
+        return false;
+    }
 }
 
 export async function checkHealth() {

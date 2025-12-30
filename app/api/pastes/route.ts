@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+import { hash } from "bcryptjs";
 import { savePaste, Paste } from "@/lib/storage";
 import { getCurrentTime } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { content, ttl_seconds, max_views, language } = body;
+    const { content, ttl_seconds, max_views, language, password } = body;
 
     // Validation
     if (!content || typeof content !== "string" || content.trim().length === 0) {
@@ -26,10 +27,19 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Language must be a string." }, { status: 400 });
     }
 
+    if (password !== undefined && (typeof password !== "string" || password.length === 0)) {
+        return NextResponse.json({ error: "Password must be a non-empty string." }, { status: 400 });
+    }
+
     const id = nanoid(10); // Short ID
     const delete_token = nanoid(24); // Secret delete token
     const now = getCurrentTime(req.headers);
     const expires_at = ttl_seconds ? now + (ttl_seconds * 1000) : null;
+    
+    let password_hash: string | undefined;
+    if (password) {
+        password_hash = await hash(password, 10);
+    }
 
     const newPaste: Paste = {
       id,
@@ -38,7 +48,8 @@ export async function POST(req: NextRequest) {
       expires_at,
       max_views: max_views || undefined,
       language: language || null,
-      delete_token
+      delete_token,
+      password_hash
     };
 
     await savePaste(newPaste);
