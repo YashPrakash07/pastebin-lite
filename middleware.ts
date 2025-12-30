@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
                       headers: { 'WWW-Authenticate': 'Basic realm="Secure Area"' } 
                   });
               }
-          } catch (e) {
+          } catch {
               return new NextResponse('Invalid credentials', { status: 401 });
           }
       }
