@@ -1,24 +1,32 @@
 # Pastebin Lite
 
-A lightweight pastebin application built with Next.js and Vercel KV (Redis).
+A secure, lightweight, and modern pastebin application built with Next.js 15, Tailwind CSS v4, and Vercel KV (Redis).
 
 ## Features
 
-- **Create Pastes**: Store text snippets simply.
-- **TTL Expiry**: Optionally set time-to-live in seconds.
-- **View Limits**: Optionally set a maximum number of views (burn after reading).
-- **Secure**: Pastes are removed precisely when constraints are met.
-- **API**: Full API support for automation.
+- **Store & Share**: Create text snippets instantly with a clean, distraction-free UI.
+- **Secure Persistence**: Powered by Vercel KV (Redis) for fast, low-latency storage.
+- **Privacy First**:
+  - **Password Protection**: Secure your pastes with bcrypt-hashed passwords.
+  - **TTL Expiry**: Set pastes to auto-expire after a specific duration (e.g., 60 seconds).
+  - **Burn After Reading**: Set a maximum view limit (e.g., 5 views) after which the paste is deleted.
+  - **Manual Deletion**: Receive a unique token to delete your paste whenever you want.
+- **Developer Friendly**:
+  - **Syntax Highlighting**: Supports 15+ languages including TypeScript, Python, Go, and Rust.
+  - **API First**: Full REST API support for automation and cli tools.
+- **Modern UI/UX**:
+  - **Dark Mode**: Fully supported dark/light themes.
+  - **Responsive Design**: Mobile-optimized interface.
+  - **Glassmorphism**: Sleek, modern aesthetics.
 
-## Persistence Layer
+## Tech Stack
 
-This project uses **Vercel KV (Redis)** for persistence.
-Choice Rationale:
-
-- **Performance**: Redis offers sub-millisecond latency for high-speed read/write access.
-- **Atomic Operations**: Essential for handling exact view counts ("burn after reading") without race conditions, utilizing Lua scripts (`eval`).
-- **Serverless Friendly**: Works perfectly with Next.js edge/serverless functions where persistent connection pools might be tricky.
-- **TTL Support**: Native Expiry simplifies garbage collection.
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Database**: [Vercel KV](https://vercel.com/docs/storage/vercel-kv) (Redis)
+- **Authentication**: Custom Password Protection (bcryptjs)
+- **Theming**: `next-themes`
+- **Icons**: `lucide-react`
 
 ## Getting Started
 
@@ -49,7 +57,7 @@ Choice Rationale:
    cp .env.example .env.local
    ```
 
-   Required variables found in `.env.example`:
+   **Required variables**:
 
    - `KV_URL`
    - `KV_REST_API_URL`
@@ -64,28 +72,56 @@ Choice Rationale:
 
 5. Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-## Testing
-
-The application supports deterministic time testing via the `x-test-now-ms` header when `TEST_MODE=1` environment variable is set.
-
 ## API Documentation
 
 ### Create Paste
 
 `POST /api/pastes`
 
+**Body:**
+
 ```json
 {
-  "content": "Hello World",
-  "ttl_seconds": 60,
-  "max_views": 5
+  "content": "console.log('Hello World');",
+  "language": "javascript", // Optional: defaults to 'plaintext'
+  "ttl_seconds": 3600, // Optional: expires in 1 hour
+  "max_views": 10, // Optional: deletes after 10 views
+  "password": "my-secret-pw" // Optional: protects the paste
 }
 ```
 
-### Get Paste Metadata
+**Response:**
+
+```json
+{
+  "id": "abc-123",
+  "url": "https://your-domain.com/p/abc-123",
+  "delete_token": "del_xyz_789" // Save this to delete the paste later!
+}
+```
+
+### Get Paste Content
 
 `GET /api/pastes/:id`
+
+Returns the raw content and metadata.
+
+### Delete Paste
+
+`DELETE /api/pastes/:id`
+
+**Body:**
+
+```json
+{
+  "delete_token": "del_xyz_789"
+}
+```
 
 ### Health Check
 
 `GET /api/healthz`
+
+## License
+
+MIT
