@@ -137,7 +137,7 @@ export default function PasteForm() {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Paste your text here..."
-                        className="w-full h-64 p-6 resize-y focus:outline-none text-neutral-800 font-mono text-sm placeholder-neutral-300"
+                        className="w-full h-64 p-6 resize-y focus:outline-none text-neutral-900 font-mono text-sm placeholder-neutral-400"
                         required
                     />
                 </div>
@@ -153,7 +153,7 @@ export default function PasteForm() {
                             placeholder="Optional (e.g. 60)"
                             value={ttl}
                             onChange={(e) => setTtl(e.target.value)}
-                            className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all"
+                            className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all text-neutral-900 placeholder-neutral-400"
                         />
                     </div>
                     <div>
@@ -166,7 +166,7 @@ export default function PasteForm() {
                             placeholder="Optional (e.g. 5)"
                             value={maxViews}
                             onChange={(e) => setMaxViews(e.target.value)}
-                            className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all"
+                            className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all text-neutral-900 placeholder-neutral-400"
                         />
                     </div>
                 </div>
@@ -178,7 +178,7 @@ export default function PasteForm() {
                     <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
-                        className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all bg-white"
+                        className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all bg-white text-neutral-900"
                     >
                         <option value="plaintext">Plain Text</option>
                         <option value="javascript">JavaScript</option>
