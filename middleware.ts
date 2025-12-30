@@ -37,7 +37,8 @@ export async function middleware(req: NextRequest) {
 
       // 2. Rate Limiting
       // Limit: 50 requests per hour per IP
-      const ip = req.ip ?? '127.0.0.1';
+      const forwardedFor = req.headers.get('x-forwarded-for');
+      const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1';
       // Use checks to avoid rate limiting localhost dev too aggressively if needed
       // but strictly it should just work.
       
