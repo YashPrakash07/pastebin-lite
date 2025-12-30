@@ -12,6 +12,8 @@ export default function PasteForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<{ id: string; url: string; delete_token?: string } | null>(null);
+    const [urlCopied, setUrlCopied] = useState(false);
+    const [tokenCopied, setTokenCopied] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,10 +80,14 @@ export default function PasteForm() {
                         onClick={(e) => e.currentTarget.select()}
                     />
                     <button
-                        onClick={() => navigator.clipboard.writeText(result.url)}
-                        className="px-3 py-1.5 bg-white border border-neutral-300 rounded text-xs font-medium text-neutral-700 hover:bg-neutral-50"
+                        onClick={() => {
+                            navigator.clipboard.writeText(result.url);
+                            setUrlCopied(true);
+                            setTimeout(() => setUrlCopied(false), 2000);
+                        }}
+                        className="px-3 py-1.5 bg-white border border-neutral-300 rounded text-xs font-medium text-neutral-700 hover:bg-neutral-50 min-w-[60px] transition-all"
                     >
-                        Copy
+                        {urlCopied ? "Copied!" : "Copy"}
                     </button>
                 </div>
 
@@ -96,10 +102,14 @@ export default function PasteForm() {
                                 onClick={(e) => e.currentTarget.select()}
                             />
                             <button
-                                onClick={() => navigator.clipboard.writeText(result.delete_token || "")}
-                                className="px-2 py-1 bg-white border border-red-300 rounded text-[10px] font-medium text-red-700 hover:bg-red-50"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(result.delete_token || "");
+                                    setTokenCopied(true);
+                                    setTimeout(() => setTokenCopied(false), 2000);
+                                }}
+                                className="px-2 py-1 bg-white border border-red-300 rounded text-[10px] font-medium text-red-700 hover:bg-red-50 min-w-[50px] transition-all"
                             >
-                                Copy
+                                {tokenCopied ? "Copied!" : "Copy"}
                             </button>
                         </div>
                         <p className="text-[10px] text-red-400 w-full text-left">
