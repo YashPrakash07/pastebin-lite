@@ -8,6 +8,8 @@ export interface Paste {
   expires_at?: number | null;
   max_views?: number | null;
   remaining_views?: number | null;
+  language?: string | null;
+  delete_token?: string | null;
 }
 
 export async function savePaste(paste: Paste) {
@@ -27,6 +29,14 @@ export async function savePaste(paste: Paste) {
   if (paste.max_views !== undefined && paste.max_views !== null) {
       data.max_views = paste.max_views;
       data.remaining_views = paste.max_views;
+  }
+
+  if (paste.language) {
+      data.language = paste.language;
+  }
+  
+  if (paste.delete_token) {
+      data.delete_token = paste.delete_token;
   }
 
   await kv.hset(key, data);
@@ -104,7 +114,9 @@ export async function getPaste(id: string, now: number): Promise<Paste | null> {
           created_at: parseInt(parsed.created_at),
           expires_at: parsed.expires_at ? parseInt(parsed.expires_at) : null,
           max_views: parsed.max_views ? parseInt(parsed.max_views) : null,
-          remaining_views: parsed.remaining_views !== undefined && parsed.remaining_views !== null ? parseInt(parsed.remaining_views) : null
+          remaining_views: parsed.remaining_views !== undefined && parsed.remaining_views !== null ? parseInt(parsed.remaining_views) : null,
+          language: parsed.language || null,
+          delete_token: parsed.delete_token || null
       };
   } catch (err) {
       console.error("Redis Error", err);

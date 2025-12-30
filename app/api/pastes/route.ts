@@ -6,7 +6,7 @@ import { getCurrentTime } from "@/lib/utils";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { content, ttl_seconds, max_views } = body;
+    const { content, ttl_seconds, max_views, language } = body;
 
     // Validation
     if (!content || typeof content !== "string" || content.trim().length === 0) {
@@ -20,8 +20,14 @@ export async function POST(req: NextRequest) {
     if (max_views !== undefined && (typeof max_views !== "number" || max_views < 1)) {
         return NextResponse.json({ error: "max_views must be a number >= 1." }, { status: 400 });
     }
+    
+    // Optional language validation (basic string check)
+    if (language !== undefined && typeof language !== "string") {
+        return NextResponse.json({ error: "Language must be a string." }, { status: 400 });
+    }
 
     const id = nanoid(10); // Short ID
+    const delete_token = nanoid(24); // Secret delete token
     const now = getCurrentTime(req.headers);
     const expires_at = ttl_seconds ? now + (ttl_seconds * 1000) : null;
 
@@ -31,15 +37,16 @@ export async function POST(req: NextRequest) {
       created_at: now,
       expires_at,
       max_views: max_views || undefined,
+      language: language || null,
+      delete_token
     };
 
     await savePaste(newPaste);
 
     // Construct URL
-    // Use req.url to resolve the base URL automatically, handling protocol and host.
     const url = new URL(`/p/${id}`, req.url).toString();
 
-    return NextResponse.json({ id, url }, { status: 200 });
+    return NextResponse.json({ id, url, delete_token }, { status: 200 });
 
   } catch (error) {
     console.error(error);

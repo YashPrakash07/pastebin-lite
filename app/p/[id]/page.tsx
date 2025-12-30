@@ -4,6 +4,8 @@ import { getPaste } from "@/lib/storage";
 import { getCurrentTime } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import PasteViewer from "@/components/paste-viewer";
+import DeletePasteButton from "@/components/delete-button";
 
 export default async function PastePage({
     params,
@@ -32,23 +34,31 @@ export default async function PastePage({
 
                 <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
 
-                    <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200 flex justify-between items-center">
+                    <div className="bg-neutral-50 px-6 py-4 border-b border-neutral-200 flex justify-between items-center relative">
                         <div className="flex flex-col">
                             <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Paste ID</span>
-                            <span className="text-sm font-semibold text-neutral-900">{paste.id}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-neutral-900">{paste.id}</span>
+                                {paste.language && (
+                                    <span className="text-[10px] bg-neutral-200 text-neutral-600 px-1.5 py-0.5 rounded-full font-medium">
+                                        {paste.language}
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider block">Created</span>
-                            <span className="text-sm text-neutral-700">
-                                {new Date(paste.created_at).toLocaleString()}
-                            </span>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right">
+                                <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider block">Created</span>
+                                <span className="text-sm text-neutral-700">
+                                    {new Date(paste.created_at).toLocaleString()}
+                                </span>
+                            </div>
+                            <DeletePasteButton id={paste.id} />
                         </div>
                     </div>
 
                     <div className="p-6 overflow-x-auto">
-                        <pre className="font-mono text-sm text-neutral-800 whitespace-pre-wrap break-all">
-                            {paste.content}
-                        </pre>
+                        <PasteViewer content={paste.content} language={paste.language || "plaintext"} />
                     </div>
 
                     {(paste.expires_at || paste.max_views) && (

@@ -8,9 +8,10 @@ export default function PasteForm() {
     const [content, setContent] = useState("");
     const [ttl, setTtl] = useState("");
     const [maxViews, setMaxViews] = useState("");
+    const [language, setLanguage] = useState("plaintext");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [result, setResult] = useState<{ id: string; url: string } | null>(null);
+    const [result, setResult] = useState<{ id: string; url: string; delete_token?: string } | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -18,7 +19,10 @@ export default function PasteForm() {
         setLoading(true);
 
         try {
-            const body: { content: string; ttl_seconds?: number; max_views?: number } = { content };
+            const body: { content: string; ttl_seconds?: number; max_views?: number; language?: string } = { content };
+            if (language && language !== "plaintext") {
+                body.language = language;
+            }
             if (ttl) {
                 const ttlVal = parseInt(ttl);
                 if (isNaN(ttlVal) || ttlVal < 1) throw new Error("Invalid TTL");
@@ -81,6 +85,29 @@ export default function PasteForm() {
                     </button>
                 </div>
 
+                {result.delete_token && (
+                    <div className="flex flex-col items-center gap-2 bg-red-50 p-3 rounded-md mb-6 border border-red-200">
+                        <div className="flex items-center gap-2 w-full">
+                            <span className="text-xs font-bold text-red-500 uppercase tracking-wider">Delete Token</span>
+                            <input
+                                readOnly
+                                value={result.delete_token}
+                                className="flex-1 bg-transparent border-none focus:ring-0 text-xs text-red-800 font-mono"
+                                onClick={(e) => e.currentTarget.select()}
+                            />
+                            <button
+                                onClick={() => navigator.clipboard.writeText(result.delete_token || "")}
+                                className="px-2 py-1 bg-white border border-red-300 rounded text-[10px] font-medium text-red-700 hover:bg-red-50"
+                            >
+                                Copy
+                            </button>
+                        </div>
+                        <p className="text-[10px] text-red-400 w-full text-left">
+                            Save this token! You need it to delete this paste manually.
+                        </p>
+                    </div>
+                )}
+
                 <div className="flex gap-4 justify-center">
                     <a href={result.url} target="_blank" className="text-blue-600 hover:underline text-sm font-medium">
                         View Paste
@@ -91,6 +118,7 @@ export default function PasteForm() {
                             setContent("");
                             setTtl("");
                             setMaxViews("");
+                            setLanguage("plaintext");
                         }}
                         className="text-neutral-500 hover:text-neutral-900 text-sm font-medium"
                     >
@@ -141,6 +169,33 @@ export default function PasteForm() {
                             className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all"
                         />
                     </div>
+                </div>
+
+                <div className="bg-neutral-50 px-6 pb-6 border-neutral-100">
+                    <label className="block text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2">
+                        Language (Syntax Highlighting)
+                    </label>
+                    <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="w-full p-2.5 rounded-md border border-neutral-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm transition-all bg-white"
+                    >
+                        <option value="plaintext">Plain Text</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="python">Python</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                        <option value="csharp">C#</option>
+                        <option value="go">Go</option>
+                        <option value="rust">Rust</option>
+                        <option value="css">CSS</option>
+                        <option value="html">HTML</option>
+                        <option value="json">JSON</option>
+                        <option value="sql">SQL</option>
+                        <option value="bash">Bash</option>
+                        <option value="yaml">YAML</option>
+                    </select>
                 </div>
 
                 <div className="px-6 py-4 bg-neutral-50 border-t border-neutral-100 flex justify-between items-center">
