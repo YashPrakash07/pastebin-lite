@@ -51,81 +51,82 @@ export async function savePaste(paste: Paste) {
   }
 }
 
-export async function getPaste(id: string, now: number): Promise<Paste | null> {
+export type PasteResult = 
+  | { status: "OK"; paste: Paste }
+  | { status: "EXPIRED" }
+  | { status: "LIMIT_REACHED" }
+  | { status: "NOT_FOUND" };
+
+export async function getPaste(id: string, now: number): Promise<PasteResult> {
   const key = `paste:${id}`;
-  
-  // Lua script to perform atomic check-and-decrement
-  // We return the JSON encoded paste if valid, or nil.
-  // note: keys/args are stringified.
-  
-  // Note: HGETALL returns an array [field, value, field, value...] in typical redis,
-  // but @vercel/kv hgetall returns an object.
-  // However, inside Lua, redis.call('HGETALL') returns the array.
   
   const script = `
     local key = KEYS[1]
     local now = tonumber(ARGV[1])
 
     if redis.call("EXISTS", key) == 0 then
-        return nil
+        return cjson.encode({ status = "NOT_FOUND" })
     end
 
     local fields = redis.call("HGETALL", key)
     local paste = {}
-    -- Convert array to map
     for i = 1, #fields, 2 do
         paste[fields[i]] = fields[i + 1]
     end
 
-    -- Check Expiry (if exists)
     if paste["expires_at"] and paste["expires_at"] ~= "null" then
         if tonumber(paste["expires_at"]) < now then
-             return nil
+             return cjson.encode({ status = "EXPIRED" })
         end
     end
 
-    -- If password protected, WE DO NOT DECREMENT HERE.
-    -- The API must verify password first, then call decrementViews manually.
     if paste["password_hash"] and paste["password_hash"] ~= "null" then
-        return cjson.encode(paste)
+        return cjson.encode({ status = "OK", paste = paste })
     end
 
-    -- Check View Limit (if exists)
     if paste["remaining_views"] and paste["remaining_views"] ~= "null" then
         local views = tonumber(paste["remaining_views"])
         if views <= 0 then
-            return nil
+            return cjson.encode({ status = "LIMIT_REACHED" })
         end
-        -- Decrement
         redis.call("HINCRBY", key, "remaining_views", -1)
         paste["remaining_views"] = views - 1
     end
 
-    return cjson.encode(paste)
+    return cjson.encode({ status = "OK", paste = paste })
   `;
 
   try {
       const result = await kv.eval(script, [key], [now]);
-      if (!result) return null;
+      if (!result) return { status: "NOT_FOUND" };
       
-      const parsed = typeof result === 'string' ? JSON.parse(result) : result;
-      // Ensure types
-      return {
-          id: parsed.id,
-          content: parsed.content,
-          created_at: parseInt(parsed.created_at),
-          expires_at: parsed.expires_at ? parseInt(parsed.expires_at) : null,
-          max_views: parsed.max_views ? parseInt(parsed.max_views) : null,
-          remaining_views: parsed.remaining_views !== undefined && parsed.remaining_views !== null ? parseInt(parsed.remaining_views) : null,
-          language: parsed.language || null,
-          delete_token: parsed.delete_token || null,
-          password_hash: parsed.password_hash || null
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const parsed: any = typeof result === 'string' ? JSON.parse(result) : result;
+
+      if (parsed.status !== "OK") {
+        return { status: parsed.status };
+      }
+
+      const rawPaste = parsed.paste;
+      
+      const paste: Paste = {
+          id: rawPaste.id,
+          content: rawPaste.content,
+          created_at: parseInt(rawPaste.created_at),
+          expires_at: rawPaste.expires_at ? parseInt(rawPaste.expires_at) : null,
+          max_views: rawPaste.max_views ? parseInt(rawPaste.max_views) : null,
+          remaining_views: rawPaste.remaining_views !== undefined && rawPaste.remaining_views !== null ? parseInt(rawPaste.remaining_views) : null,
+          language: rawPaste.language || null,
+          delete_token: rawPaste.delete_token || null,
+          password_hash: rawPaste.password_hash || null
       };
+
+      return { status: "OK", paste };
+
   } catch (err) {
       console.error("Redis Error", err);
-      // Fallback or error
-      // If KV is not configured, this will throw.
-      return null;
+      // If KV is not configured, we might want to return NOT_FOUND or handle differently
+      return { status: "NOT_FOUND" }; 
   }
 }
 
@@ -154,4 +155,17 @@ export async function checkHealth() {
     } catch {
         return false;
     }
+}
+
+export async function deletePaste(id: string, delete_token: string): Promise<boolean> {
+    const key = `paste:${id}`;
+    // We need to fetch the token first to verify
+    const storedToken = await kv.hget(key, "delete_token");
+    
+    if (!storedToken || storedToken !== delete_token) {
+        return false;
+    }
+    
+    await kv.del(key);
+    return true;
 }
