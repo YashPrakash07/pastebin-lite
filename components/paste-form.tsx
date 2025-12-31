@@ -76,11 +76,11 @@ export default function PasteForm() {
                 <p className="text-neutral-500 dark:text-neutral-400 mb-8 text-lg">Your paste is ready to share.</p>
 
                 <div className="flex items-center gap-3 bg-neutral-50/80 dark:bg-neutral-800/50 p-4 rounded-2xl mb-6 border border-neutral-200/60 dark:border-neutral-700 shadow-sm group hover:border-indigo-200 dark:hover:border-indigo-800 transition-colors">
-                    <LinkIcon className="w-5 h-5 text-neutral-400 ml-1 group-hover:text-indigo-500 transition-colors" />
+                    <LinkIcon className="w-5 h-5 text-neutral-400 ml-1 group-hover:text-indigo-500 transition-colors shrink-0" />
                     <input
                         readOnly
                         value={result.url}
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-base text-neutral-800 dark:text-neutral-200 font-mono"
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-base text-neutral-800 dark:text-neutral-200 font-mono min-w-0"
                         onClick={(e) => e.currentTarget.select()}
                     />
                     <button
@@ -89,7 +89,7 @@ export default function PasteForm() {
                             setUrlCopied(true);
                             setTimeout(() => setUrlCopied(false), 2000);
                         }}
-                        className="px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700 rounded-xl text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 hover:border-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 min-w-[80px] transition-all shadow-sm active:scale-95"
+                        className="px-4 py-2 bg-white dark:bg-neutral-800 border border-neutral-200/60 dark:border-neutral-700 rounded-xl text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-700 hover:border-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 min-w-[80px] transition-all shadow-sm active:scale-95 shrink-0"
                     >
                         {urlCopied ? "Copied!" : "Copy"}
                     </button>
@@ -98,11 +98,11 @@ export default function PasteForm() {
                 {result.delete_token && (
                     <div className="flex flex-col items-center gap-3 bg-red-50/50 dark:bg-red-900/10 p-4 rounded-2xl mb-8 border border-red-100/60 dark:border-red-900/30">
                         <div className="flex items-center gap-3 w-full">
-                            <span className="text-xs font-bold text-red-500 dark:text-red-400 uppercase tracking-wider bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-md">Delete Token</span>
+                            <span className="text-xs font-bold text-red-500 dark:text-red-400 uppercase tracking-wider bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded-md shrink-0">Delete Token</span>
                             <input
                                 readOnly
                                 value={result.delete_token}
-                                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-red-800 dark:text-red-300 font-mono"
+                                className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-red-800 dark:text-red-300 font-mono min-w-0"
                                 onClick={(e) => e.currentTarget.select()}
                             />
                             <button
@@ -111,7 +111,7 @@ export default function PasteForm() {
                                     setTokenCopied(true);
                                     setTimeout(() => setTokenCopied(false), 2000);
                                 }}
-                                className="px-3 py-1.5 bg-white dark:bg-neutral-800 border border-red-200 dark:border-red-800 rounded-xl text-xs font-semibold text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 min-w-[60px] transition-all shadow-sm active:scale-95"
+                                className="px-3 py-1.5 bg-white dark:bg-neutral-800 border border-red-200 dark:border-red-800 rounded-xl text-xs font-semibold text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 min-w-[60px] transition-all shadow-sm active:scale-95 shrink-0"
                             >
                                 {tokenCopied ? "Copied!" : "Copy"}
                             </button>
